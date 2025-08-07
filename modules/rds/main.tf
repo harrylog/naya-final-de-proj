@@ -120,7 +120,7 @@ resource "aws_db_instance" "mysql" {
   deletion_protection = false # For dev environment
   
   # Enable automated backups and binary logging
-  enabled_cloudwatch_logs_exports = ["error", "general", "slow_query"]
+  enabled_cloudwatch_logs_exports = ["error", "general", "slowquery"]
   
   tags = {
     Name        = "${var.project_name}-${var.environment}-db"

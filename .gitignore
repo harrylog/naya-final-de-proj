@@ -1,0 +1,64 @@
+# Terraform .gitignore
+
+# Terraform state files
+*.tfstate
+*.tfstate.*
+*.tfstate.backup
+
+# Terraform crash log files
+crash.log
+crash.*.log
+
+# Terraform variable files (may contain sensitive data)
+*.tfvars
+*.tfvars.json
+!terraform.tfvars.example
+
+# Terraform plan files
+*.tfplan
+*.tfplan.*
+
+# Terraform CLI configuration files
+.terraformrc
+terraform.rc
+
+# Terraform directories
+.terraform/
+.terraform.lock.hcl
+
+# Logs directory
+logs/
+*.log
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Backup files
+*.bak
+*.backup
+
+# Sensitive files
+*.pem
+*.key
+*.crt
+secrets.txt
+
+# Local environment files
+.env
+.env.local
+
+# AWS CLI cache
+.aws/cli/cache/
