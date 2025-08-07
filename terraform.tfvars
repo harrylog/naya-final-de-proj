@@ -11,3 +11,6 @@ your_ip = "YOUR_PUBLIC_IP_HERE/32"
 # RDS Configuration
 db_instance_class = "db.t3.micro"  # Free tier eligible
 allocated_storage = 20             # Free tier eligible
+
+
+db_password = "naya-final"

@@ -23,3 +23,4 @@ output "parameter_group_name" {
   description = "Parameter group name"
   value       = aws_db_parameter_group.mysql.name
 }
+

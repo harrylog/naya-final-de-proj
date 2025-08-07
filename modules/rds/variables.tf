@@ -12,7 +12,9 @@ variable "environment" {
 variable "db_password" {
   description = "Database password"
   type        = string
-  sensitive   = true
+  sensitive   = false
+  default     = ""
+
 }
 
 variable "vpc_id" {

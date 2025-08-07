@@ -41,7 +41,7 @@ module "rds" {
   
   project_name          = var.project_name
   environment           = var.environment
-  db_password           = random_password.db_password.result
+  db_password           = var.db_password != "" ? var.db_password : random_password.db_password.result
   vpc_id                = module.vpc.vpc_id
   private_subnet_ids    = module.vpc.private_subnet_ids
   public_subnet_ids     = module.vpc.public_subnet_ids
