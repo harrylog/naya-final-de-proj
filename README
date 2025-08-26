@@ -145,4 +145,10 @@ rds_endpoint = "naya-de-proj-mysql-db.cdwsmiaocq0o.us-east-1.rds.amazonaws.com:3
 rds_identifier = "naya-de-proj-mysql-db"
 rds_port = 3306
 
-harry8mysql
+local workbench
+username hrylog 
+password: harry8mysql
+
+rds details :
+VPC security groups
+default (sg-03625d41b582de0e1)

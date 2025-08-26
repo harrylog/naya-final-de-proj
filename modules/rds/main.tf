@@ -32,6 +32,8 @@ resource "aws_db_instance" "mysql_db" {
   engine         = "mysql"
   engine_version = "8.0.37"
   instance_class = "db.t3.micro"  # Free tier eligible
+  db_subnet_group_name   = aws_db_subnet_group.mysql_subnet_group.name
+  vpc_security_group_ids = [aws_security_group.rds_sg.id]
   
   # Database configuration
   db_name  = var.db_name
@@ -67,3 +69,58 @@ resource "aws_db_instance" "mysql_db" {
   
   tags = var.common_tags
 }
+
+# ADD THIS TO modules/rds/main.tf (before the security group resource)
+
+# Get the default VPC
+data "aws_vpc" "default" {
+  default = true
+}
+
+# Get all subnets in the default VPC
+data "aws_subnets" "default" {
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.default.id]
+  }
+}
+
+# Create DB subnet group (required for security group assignment)
+resource "aws_db_subnet_group" "mysql_subnet_group" {
+  name       = "${var.db_identifier}-subnet-group"
+  subnet_ids = data.aws_subnets.default.ids
+
+  tags = merge(var.common_tags, {
+    Name = "${var.db_identifier}-subnet-group"
+  })
+}
+
+
+# Create a security group for the RDS instance
+resource "aws_security_group" "rds_sg" {
+  name_prefix = "${var.db_identifier}-sg"
+  description = "Security group for ${var.db_identifier} RDS instance"
+
+  # Inbound rule for MySQL access from anywhere (learning purposes)
+  ingress {
+    description = "MySQL access"
+    from_port   = 3306
+    to_port     = 3306
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]  # Open to world - learning only!
+  }
+
+  # Outbound rule (usually needed for RDS)
+  egress {
+    description = "All outbound traffic"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = merge(var.common_tags, {
+    Name = "${var.db_identifier}-security-group"
+  })
+}
+

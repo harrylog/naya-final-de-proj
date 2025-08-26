@@ -41,3 +41,15 @@ output "db_engine_version" {
   description = "The actual engine version of the RDS instance"
   value       = aws_db_instance.mysql_db.engine_version_actual
 }
+
+# ADD THIS TO modules/rds/outputs.tf
+
+output "security_group_id" {
+  description = "ID of the RDS security group"
+  value       = aws_security_group.rds_sg.id
+}
+
+output "security_group_name" {
+  description = "Name of the RDS security group"
+  value       = aws_security_group.rds_sg.name
+}
