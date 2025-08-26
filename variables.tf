@@ -1,37 +1,55 @@
-# variables.tf
+# Root variables.tf
+# Define all input variables for the root configuration
+
 variable "aws_region" {
-  description = "AWS region"
+  description = "AWS region where resources will be created"
   type        = string
   default     = "us-east-1"
 }
 
-variable "project_name" {
-  description = "Name of the project"
+variable "db_identifier" {
+  description = "Unique identifier for the RDS instance"
   type        = string
-  default     = "naya-de-proj"
+  default     = "naya-de-proj-mysql-db"
 }
 
-variable "environment" {
-  description = "Environment (dev, staging, prod)"
+variable "db_name" {
+  description = "Name of the initial database to create"
   type        = string
-  default     = "dev"
+  default     = "naya_de_db"
 }
 
-variable "your_ip" {
-  description = "Your public IP address for MySQL Workbench access"
+variable "master_username" {
+  description = "Master username for the RDS instance"
   type        = string
-  # You'll need to set this when running terraform apply
-  # You can find your IP at: curl ifconfig.me
+  default     = "admin"
 }
 
-variable "db_instance_class" {
-  description = "RDS instance class"
+variable "master_password" {
+  description = "Master password for the RDS instance"
   type        = string
-  default     = "db.t3.micro"  # Free tier eligible
+  default     = "naya-de-proj-pwd-mysql8"
+  sensitive   = true  # This marks the variable as sensitive in logs
 }
 
-variable "allocated_storage" {
-  description = "The allocated storage in gigabytes"
-  type        = number
-  default     = 20  # Free tier eligible
+variable "parameter_group_name" {
+  description = "Name for the DB parameter group"
+  type        = string
+  default     = "naya-de-proj-db-pg"
+}
+
+variable "parameter_group_description" {
+  description = "Description for the DB parameter group"
+  type        = string
+  default     = "Parameter group for MySQL configuration"
+}
+
+variable "common_tags" {
+  description = "Common tags to apply to all resources"
+  type        = map(string)
+  default = {
+    Project     = "naya-data-engineering"
+    Environment = "development"
+    Owner       = "naya-learning"
+  }
 }

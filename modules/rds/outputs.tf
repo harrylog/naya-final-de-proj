@@ -1,26 +1,43 @@
 # modules/rds/outputs.tf
+# Output values from the RDS module
+# These can be used by other modules or displayed to the user
+
 output "db_endpoint" {
-  description = "RDS instance endpoint"
-  value       = aws_db_instance.mysql.endpoint
+  description = "The RDS instance endpoint"
+  value       = aws_db_instance.mysql_db.endpoint
 }
 
 output "db_port" {
-  description = "RDS instance port"
-  value       = aws_db_instance.mysql.port
+  description = "The RDS instance port"
+  value       = aws_db_instance.mysql_db.port
 }
 
-output "db_name" {
-  description = "Database name"
-  value       = aws_db_instance.mysql.db_name
+output "db_identifier" {
+  description = "The RDS instance identifier"
+  value       = aws_db_instance.mysql_db.identifier
 }
 
-output "db_instance_id" {
-  description = "RDS instance ID"
-  value       = aws_db_instance.mysql.id
+output "db_arn" {
+  description = "The ARN of the RDS instance"
+  value       = aws_db_instance.mysql_db.arn
 }
 
 output "parameter_group_name" {
-  description = "Parameter group name"
-  value       = aws_db_parameter_group.mysql.name
+  description = "The name of the parameter group"
+  value       = aws_db_parameter_group.mysql_params.name
 }
 
+output "parameter_group_arn" {
+  description = "The ARN of the parameter group"
+  value       = aws_db_parameter_group.mysql_params.arn
+}
+
+output "db_instance_status" {
+  description = "The current status of the RDS instance"
+  value       = aws_db_instance.mysql_db.status
+}
+
+output "db_engine_version" {
+  description = "The actual engine version of the RDS instance"
+  value       = aws_db_instance.mysql_db.engine_version_actual
+}

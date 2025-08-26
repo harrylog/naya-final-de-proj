@@ -1,0 +1,148 @@
+# Terraform AWS Data Engineering Project Setup Guide
+
+## Project Structure Overview
+
+```
+terraform-data-project/
+├── main.tf                 # Root configuration that calls modules
+├── variables.tf           # Root-level input variables
+├── outputs.tf            # Root-level outputs
+├── terraform.tfvars      # Variable values (your customizations)
+└── modules/
+    └── rds/
+        ├── main.tf        # RDS module implementation
+        ├── variables.tf   # Module input variables
+        └── outputs.tf     # Module outputs
+```
+
+## Key Concepts for Data Engineering
+
+### Why This Structure Matters
+
+**Modularity**: The RDS module can be reused across different environments (dev, staging, prod) or projects. As a former full-stack developer, think of modules like reusable components in React.
+
+**Separation of Concerns**:
+
+- **Root configuration**: Orchestrates the overall infrastructure
+- **Module**: Contains the specific logic for creating RDS resources
+- **Variables**: Make everything configurable without hardcoding values
+
+### RDS Configuration for Data Engineering
+
+**Parameter Group Settings**:
+
+- `binlog_format = ROW`: Essential for ETL processes - captures row-level changes
+- `binlog_row_image = full`: Records complete row data, crucial for CDC (Change Data Capture)
+
+**Why These Parameters Matter**:
+
+- **ETL Processes**: Row-based binary logging allows you to track individual record changes
+- **Data Pipeline Integration**: Tools like Debezium, AWS DMS can read these logs for real-time data streaming
+- **Audit Trails**: Full row images help with data lineage and debugging
+
+## Prerequisites
+
+1. **AWS CLI configured** with appropriate credentials
+2. **Terraform installed** (version 1.0+)
+3. **AWS Account** with permissions to create RDS resources
+
+## Step-by-Step Deployment
+
+### 1. Initialize Terraform
+
+```bash
+# Navigate to your project directory
+cd terraform-data-project
+
+# Initialize Terraform (downloads providers and modules)
+terraform init
+```
+
+### 2. Plan the Deployment
+
+```bash
+# See what resources will be created
+terraform plan
+```
+
+### 3. Apply the Configuration
+
+```bash
+# Create the resources
+terraform apply
+
+# Type 'yes' when prompted
+```
+
+### 4. Connect to Your Database
+
+After successful deployment, use the outputs to connect:
+
+```bash
+# Get the database endpoint
+terraform output rds_endpoint
+
+# Example connection with MySQL client
+mysql -h [endpoint] -u admin -p naya_de_db
+```
+
+## Important Notes for Learning
+
+### Security Considerations
+
+- **Password Management**: In production, use AWS Secrets Manager instead of plain text passwords
+- **Network Access**: The `publicly_accessible = true` setting is for learning only
+- **VPC Configuration**: Production deployments should use private subnets
+
+### Cost Management
+
+- **Free Tier**: `db.t3.micro` is free tier eligible for 12 months
+- **Storage**: Auto-scaling is enabled (20GB minimum, 100GB maximum)
+- **Backups**: 7-day retention balances learning needs with cost
+
+### Cleanup
+
+```bash
+# When you're done learning, clean up resources to avoid charges
+terraform destroy
+```
+
+## Next Steps for ETL Learning
+
+1. **Connect Python**: Use SQLAlchemy or pymysql to connect from Python
+2. **Load Sample Data**: Practice INSERT operations and data loading
+3. **Monitor Binary Logs**: Learn to read MySQL binary logs for CDC
+4. **Add S3 Integration**: Next module could be S3 for data lake functionality
+
+## Troubleshooting Common Issues
+
+### AWS Credentials
+
+```bash
+# Check if AWS CLI is configured
+aws sts get-caller-identity
+```
+
+### Terraform State
+
+```bash
+# If you encounter state issues
+terraform refresh
+
+# To see current state
+terraform show
+```
+
+### Database Connection
+
+- Ensure your IP is allowed in the security group (Terraform uses default VPC security group)
+- Wait 5-10 minutes after `terraform apply` for the database to be fully available
+
+# after apply
+
+parameter_group_name = "naya-de-proj-db-pg"
+rds_endpoint = "naya-de-proj-mysql-db.cdwsmiaocq0o.us-east-1.rds.amazonaws.com:3306"
+rds_identifier = "naya-de-proj-mysql-db"
+rds_port = 3306
+
+harry8mysql
