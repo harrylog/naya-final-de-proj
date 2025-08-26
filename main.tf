@@ -64,11 +64,14 @@ module "iam_policies" {
 module "dms_migration" {
   source = "./modules/dms"
   
-  # Pass RDS connection details from the RDS module
+  # Pass RDS connection details
   rds_endpoint      = module.mysql_database.db_endpoint
   rds_username      = var.master_username
   rds_password      = var.master_password  
   rds_database_name = var.db_name
+  
+  # Pass S3 bucket info
+  s3_bucket_name = module.data_lake.bucket_name
   
   common_tags = var.common_tags
 }

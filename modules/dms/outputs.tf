@@ -25,3 +25,23 @@ output "dms_security_group_id" {
   description = "ID of the DMS security group"
   value       = aws_security_group.dms_sg.id
 }
+
+
+
+
+# ADD THIS TO modules/dms/outputs.tf
+
+output "source_endpoint_arn" {
+  description = "ARN of the DMS source endpoint"
+  value       = aws_dms_endpoint.source.endpoint_arn
+}
+
+output "target_endpoint_arn" {
+  description = "ARN of the DMS target endpoint"  
+  value       = aws_dms_endpoint.target.endpoint_arn
+}
+
+output "dms_s3_role_arn" {
+  description = "ARN of the DMS S3 access role"
+  value       = aws_iam_role.dms_s3_access_role.arn
+}

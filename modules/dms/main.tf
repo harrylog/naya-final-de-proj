@@ -155,3 +155,73 @@ resource "aws_dms_endpoint" "source" {
 
   tags = var.common_tags
 }
+
+# ADD THIS TO modules/dms/main.tf (after the source endpoint)
+
+# Create IAM role for DMS S3 access
+resource "aws_iam_role" "dms_s3_access_role" {
+  name = var.dms_s3_role_name
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "dms.amazonaws.com"
+        }
+      }
+    ]
+  })
+
+  tags = var.common_tags
+}
+
+# Create custom policy allowing all S3 actions and resources
+resource "aws_iam_policy" "dms_s3_full_access" {
+  name        = "${var.dms_s3_role_name}-policy"
+  description = "Full S3 access for DMS target endpoint"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = "s3:*"
+        Resource = "*"
+      }
+    ]
+  })
+
+  tags = var.common_tags
+}
+
+# Attach the custom S3 policy to the DMS role
+resource "aws_iam_role_policy_attachment" "dms_s3_access" {
+  role       = aws_iam_role.dms_s3_access_role.name
+  policy_arn = aws_iam_policy.dms_s3_full_access.arn
+}
+
+# Create DMS target endpoint (S3)
+resource "aws_dms_endpoint" "target" {
+  endpoint_id   = var.target_endpoint_id
+  endpoint_type = "target"
+  engine_name   = "s3"
+
+  # S3 target configuration
+  s3_settings {
+    bucket_name             = var.s3_bucket_name
+    bucket_folder           = "bronze_data"
+    service_access_role_arn = aws_iam_role.dms_s3_access_role.arn
+    
+    # Endpoint settings as requested
+    add_column_name = true  # This is the addcolname setting
+  }
+
+  tags = var.common_tags
+
+  depends_on = [
+    aws_iam_role_policy_attachment.dms_s3_access
+  ]
+}

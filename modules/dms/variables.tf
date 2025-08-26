@@ -84,3 +84,22 @@ variable "rds_database_name" {
   description = "RDS database name"
   type        = string
 }
+
+# ADD THESE TO modules/dms/variables.tf
+
+variable "dms_s3_role_name" {
+  description = "Name for the DMS S3 access role"
+  type        = string
+  default     = "dms-s3-access-role"
+}
+
+variable "target_endpoint_id" {
+  description = "Identifier for the DMS target endpoint"
+  type        = string
+  default     = "de-proj-target-point"
+}
+
+variable "s3_bucket_name" {
+  description = "Name of the S3 bucket for target endpoint"
+  type        = string
+}
