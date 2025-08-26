@@ -3,8 +3,8 @@
 # These can be used by other modules or displayed to the user
 
 output "db_endpoint" {
-  description = "The RDS instance endpoint"
-  value       = aws_db_instance.mysql_db.endpoint
+  description = "The RDS instance endpoint (hostname only)"
+  value       = split(":", aws_db_instance.mysql_db.endpoint)[0]
 }
 
 output "db_port" {
@@ -52,4 +52,9 @@ output "security_group_id" {
 output "security_group_name" {
   description = "Name of the RDS security group"
   value       = aws_security_group.rds_sg.name
+}
+
+output "db_endpoint_with_port" {
+  description = "The RDS instance endpoint with port"
+  value       = aws_db_instance.mysql_db.endpoint
 }

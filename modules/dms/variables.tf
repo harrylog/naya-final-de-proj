@@ -42,3 +42,45 @@ variable "common_tags" {
   type        = map(string)
   default     = {}
 }
+
+# ADD THESE TO modules/dms/variables.tf
+
+variable "dms_logs_role_name" {
+  description = "Name for the DMS CloudWatch logs role"
+  type        = string
+  default     = "dms-logs-role"
+}
+
+variable "source_endpoint_id" {
+  description = "Identifier for the DMS source endpoint"
+  type        = string
+  default     = "de-proj-src-point"
+}
+
+# RDS connection details (passed from root)
+variable "rds_endpoint" {
+  description = "RDS endpoint hostname"
+  type        = string
+}
+
+variable "rds_port" {
+  description = "RDS port"
+  type        = number
+  default     = 3306
+}
+
+variable "rds_username" {
+  description = "RDS master username"
+  type        = string
+}
+
+variable "rds_password" {
+  description = "RDS master password"
+  type        = string
+  sensitive   = true
+}
+
+variable "rds_database_name" {
+  description = "RDS database name"
+  type        = string
+}

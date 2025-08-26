@@ -50,21 +50,32 @@ resource "aws_dms_replication_subnet_group" "dms_subnet_group" {
 }
 
 # Create security group for DMS replication instance
+# REPLACE the aws_security_group "dms_sg" resource in modules/dms/main.tf with this:
+
 resource "aws_security_group" "dms_sg" {
   name_prefix = "${var.replication_instance_id}-sg"
   description = "Security group for DMS replication instance"
   vpc_id      = data.aws_vpc.default.id
 
-  # Inbound: Allow MySQL from RDS security group
+  # Self-referencing rule: allow all traffic within this security group
   ingress {
-    description = "MySQL access to RDS"
+    description = "Self-referencing rule for DMS"
+    from_port   = 0
+    to_port     = 65535
+    protocol    = "tcp"
+    self        = true  # This is the self-referencing rule
+  }
+
+  # Allow MySQL access from anywhere in VPC (for RDS connection)
+  ingress {
+    description = "MySQL access within VPC"
     from_port   = 3306
     to_port     = 3306
     protocol    = "tcp"
     cidr_blocks = [data.aws_vpc.default.cidr_block]
   }
 
-  # Outbound: Allow all (for S3 access and general connectivity)
+  # Outbound: Allow all traffic
   egress {
     description = "All outbound traffic"
     from_port   = 0
@@ -99,4 +110,48 @@ resource "aws_dms_replication_instance" "main" {
     aws_dms_replication_subnet_group.dms_subnet_group,
     aws_iam_role_policy_attachment.dms_vpc_management
   ]
+}
+
+# ADD THIS TO modules/dms/main.tf (after the replication instance)
+
+# Create IAM role for DMS CloudWatch logs
+resource "aws_iam_role" "dms_cloudwatch_logs_role" {
+  name = var.dms_logs_role_name
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "dms.amazonaws.com"
+        }
+      }
+    ]
+  })
+
+  tags = var.common_tags
+}
+
+# Attach AWS managed policy for DMS CloudWatch logs
+resource "aws_iam_role_policy_attachment" "dms_cloudwatch_logs" {
+  role       = aws_iam_role.dms_cloudwatch_logs_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonDMSCloudWatchLogsRole"
+}
+
+# Create DMS source endpoint (MySQL RDS)
+resource "aws_dms_endpoint" "source" {
+  endpoint_id   = var.source_endpoint_id
+  endpoint_type = "source"
+  engine_name   = "mysql"
+
+  # Connection details - using your existing RDS
+  server_name = var.rds_endpoint
+  port        = var.rds_port
+  username    = var.rds_username  
+  password    = var.rds_password
+  database_name = var.rds_database_name
+
+  tags = var.common_tags
 }

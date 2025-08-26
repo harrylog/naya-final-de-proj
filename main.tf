@@ -59,8 +59,16 @@ module "iam_policies" {
 # ADD THIS TO main.tf (after the IAM module)
 
 # Call the DMS module for database migration
+# REPLACE the DMS module call in main.tf with this:
+
 module "dms_migration" {
   source = "./modules/dms"
+  
+  # Pass RDS connection details from the RDS module
+  rds_endpoint      = module.mysql_database.db_endpoint
+  rds_username      = var.master_username
+  rds_password      = var.master_password  
+  rds_database_name = var.db_name
   
   common_tags = var.common_tags
 }
