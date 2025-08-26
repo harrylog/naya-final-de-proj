@@ -63,7 +63,7 @@ CREATE TABLE dev.orderDetails (
 );
 
 -- Configure binary logging for CDC
-CALL mysql.rds_set_configuration('binlog retention', 24);
+-- CALL mysql.rds_set_configuration('binlog retention', 24);
 
 -- Insert sample data for testing
 INSERT INTO dev.Product (productId, productName, brandName, productDescription, price, productCategory) VALUES
@@ -102,7 +102,7 @@ SHOW VARIABLES LIKE 'binlog_format';
 SHOW VARIABLES LIKE 'binlog_row_image';
 
 -- Show current binary log retention setting
-SELECT * FROM mysql.rds_configuration WHERE configuration = 'binlog retention hours';
+-- SELECT * FROM mysql.rds_configuration WHERE configuration = 'binlog retention hours';
 
 -- Test query to verify relationships
 SELECT 
