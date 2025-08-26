@@ -44,3 +44,13 @@ module "data_lake" {
   bucket_name = var.s3_bucket_name
   common_tags = var.common_tags
 }
+
+# ADD THIS TO main.tf (after the S3 module)
+
+# Call the IAM module for policies and roles
+module "iam_policies" {
+  source = "./modules/iam"
+  
+  s3_bucket_arn = module.data_lake.bucket_arn
+  common_tags   = var.common_tags
+}

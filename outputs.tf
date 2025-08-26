@@ -48,3 +48,10 @@ output "silver_folders" {
   description = "Silver layer folder structure"  
   value       = module.data_lake.silver_folders
 }
+
+# ADD THIS TO outputs.tf
+
+output "s3_policy_arn" {
+  description = "ARN of the S3 data lake access policy"
+  value       = module.iam_policies.s3_policy_arn
+}
