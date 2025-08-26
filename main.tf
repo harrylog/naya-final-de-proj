@@ -33,3 +33,14 @@ module "mysql_database" {
   # Optional: Add tags for resource management
   common_tags = var.common_tags
 }
+
+
+# ADD THIS TO main.tf (after the RDS module)
+
+# Call the S3 data lake module
+module "data_lake" {
+  source = "./modules/s3"
+  
+  bucket_name = var.s3_bucket_name
+  common_tags = var.common_tags
+}

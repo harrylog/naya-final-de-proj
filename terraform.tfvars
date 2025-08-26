@@ -22,3 +22,6 @@ common_tags = {
   Owner       = "naya-learning"
   Purpose     = "educational-etl-project"
 }
+
+
+s3_bucket_name = "naya-de-rds-cdc-s3"

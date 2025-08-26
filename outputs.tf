@@ -26,3 +26,25 @@ output "connection_string_example" {
   value       = "mysql://${var.master_username}:[PASSWORD]@${module.mysql_database.db_endpoint}:${module.mysql_database.db_port}/${var.db_name}"
   sensitive   = true
 }
+
+# ADD THIS TO outputs.tf
+
+output "s3_bucket_name" {
+  description = "Name of the data lake S3 bucket"
+  value       = module.data_lake.bucket_name
+}
+
+output "s3_bucket_arn" {
+  description = "ARN of the data lake S3 bucket"
+  value       = module.data_lake.bucket_arn
+}
+
+output "bronze_folders" {
+  description = "Bronze layer folder structure"
+  value       = module.data_lake.bronze_folders
+}
+
+output "silver_folders" {
+  description = "Silver layer folder structure"  
+  value       = module.data_lake.silver_folders
+}

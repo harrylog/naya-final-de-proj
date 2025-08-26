@@ -53,3 +53,12 @@ variable "common_tags" {
     Owner       = "naya-learning"
   }
 }
+
+
+# ADD THIS TO variables.tf
+
+variable "s3_bucket_name" {
+  description = "Name of the S3 bucket for data lake storage"
+  type        = string
+  default     = "naya-de-rds-cdc-s3"
+}

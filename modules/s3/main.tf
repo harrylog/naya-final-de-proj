@@ -1,32 +1,23 @@
 # modules/s3/main.tf
-resource "random_string" "bucket_suffix" {
-  length  = 8
-  special = false
-  upper   = false
-}
+# S3 module for data lake storage (bronze/silver layers)
 
-# S3 Bucket for Data Lake
+# Create the main S3 bucket for data lake
 resource "aws_s3_bucket" "data_lake" {
-  bucket = "${var.project_name}-${var.environment}-rds-cdc-${random_string.bucket_suffix.result}"
+  bucket = var.bucket_name
 
-  tags = {
-    Name        = "${var.project_name}-${var.environment}-rds-cdc"
-    Environment = var.environment
-    Project     = var.project_name
-    Purpose     = "Data Lake for CDC"
-  }
+  tags = var.common_tags
 }
 
-# S3 Bucket Versioning
-resource "aws_s3_bucket_versioning" "data_lake" {
+# Configure bucket versioning (default enabled)
+resource "aws_s3_bucket_versioning" "data_lake_versioning" {
   bucket = aws_s3_bucket.data_lake.id
   versioning_configuration {
     status = "Enabled"
   }
 }
 
-# S3 Bucket Encryption
-resource "aws_s3_bucket_server_side_encryption_configuration" "data_lake" {
+# Configure server-side encryption (default AWS managed)
+resource "aws_s3_bucket_server_side_encryption_configuration" "data_lake_encryption" {
   bucket = aws_s3_bucket.data_lake.id
 
   rule {
@@ -36,8 +27,8 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "data_lake" {
   }
 }
 
-# Block public access
-resource "aws_s3_bucket_public_access_block" "data_lake" {
+# Block all public access (security best practice)
+resource "aws_s3_bucket_public_access_block" "data_lake_pab" {
   bucket = aws_s3_bucket.data_lake.id
 
   block_public_acls       = true
@@ -46,75 +37,25 @@ resource "aws_s3_bucket_public_access_block" "data_lake" {
   restrict_public_buckets = true
 }
 
-# Create folder structure using S3 objects
-resource "aws_s3_object" "bronze_data_folder" {
+# Create folder structure for data lake layers
+# Bronze layer folders (raw data from source systems)
+resource "aws_s3_object" "bronze_folders" {
+  for_each = toset(var.bronze_table_folders)
+  
   bucket = aws_s3_bucket.data_lake.id
-  key    = "bronze_data/"
-  source = "/dev/null"
-
-  tags = {
-    Environment = var.environment
-    Project     = var.project_name
-  }
+  key    = "bronze_data/${each.value}/"
+  content_type = "application/x-directory"
+  
+  tags = var.common_tags
 }
 
-resource "aws_s3_object" "silver_data_folder" {
+# Silver layer folders (processed/cleaned data)
+resource "aws_s3_object" "silver_folders" {
+  for_each = toset(var.silver_table_folders)
+  
   bucket = aws_s3_bucket.data_lake.id
-  key    = "silver_data/"
-  source = "/dev/null"
-
-  tags = {
-    Environment = var.environment
-    Project     = var.project_name
-  }
-}
-
-# Bronze data table folders
-resource "aws_s3_object" "bronze_customer_folder" {
-  bucket = aws_s3_bucket.data_lake.id
-  key    = "bronze_data/customer/"
-  source = "/dev/null"
-}
-
-resource "aws_s3_object" "bronze_orders_folder" {
-  bucket = aws_s3_bucket.data_lake.id
-  key    = "bronze_data/orders/"
-  source = "/dev/null"
-}
-
-resource "aws_s3_object" "bronze_product_folder" {
-  bucket = aws_s3_bucket.data_lake.id
-  key    = "bronze_data/product/"
-  source = "/dev/null"
-}
-
-resource "aws_s3_object" "bronze_order_details_folder" {
-  bucket = aws_s3_bucket.data_lake.id
-  key    = "bronze_data/order_details/"
-  source = "/dev/null"
-}
-
-# Silver data table folders
-resource "aws_s3_object" "silver_customer_folder" {
-  bucket = aws_s3_bucket.data_lake.id
-  key    = "silver_data/customer/"
-  source = "/dev/null"
-}
-
-resource "aws_s3_object" "silver_orders_folder" {
-  bucket = aws_s3_bucket.data_lake.id
-  key    = "silver_data/orders/"
-  source = "/dev/null"
-}
-
-resource "aws_s3_object" "silver_product_folder" {
-  bucket = aws_s3_bucket.data_lake.id
-  key    = "silver_data/product/"
-  source = "/dev/null"
-}
-
-resource "aws_s3_object" "silver_order_details_folder" {
-  bucket = aws_s3_bucket.data_lake.id
-  key    = "silver_data/orderDetails/"
-  source = "/dev/null"
+  key    = "silver_data/${each.value}/"
+  content_type = "application/x-directory"
+  
+  tags = var.common_tags
 }
