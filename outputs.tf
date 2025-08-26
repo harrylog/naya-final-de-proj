@@ -55,3 +55,15 @@ output "s3_policy_arn" {
   description = "ARN of the S3 data lake access policy"
   value       = module.iam_policies.s3_policy_arn
 }
+
+# ADD THIS TO outputs.tf
+
+output "dms_replication_instance_arn" {
+  description = "ARN of the DMS replication instance"
+  value       = module.dms_migration.replication_instance_arn
+}
+
+output "dms_replication_instance_id" {
+  description = "ID of the DMS replication instance"  
+  value       = module.dms_migration.replication_instance_id
+}

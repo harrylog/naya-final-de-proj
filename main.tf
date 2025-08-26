@@ -54,3 +54,13 @@ module "iam_policies" {
   s3_bucket_arn = module.data_lake.bucket_arn
   common_tags   = var.common_tags
 }
+
+
+# ADD THIS TO main.tf (after the IAM module)
+
+# Call the DMS module for database migration
+module "dms_migration" {
+  source = "./modules/dms"
+  
+  common_tags = var.common_tags
+}
