@@ -103,3 +103,17 @@ variable "s3_bucket_name" {
   description = "Name of the S3 bucket for target endpoint"
   type        = string
 }
+
+# ADD THESE TO modules/dms/variables.tf
+
+variable "migration_task_id" {
+  description = "Identifier for the DMS migration task"
+  type        = string
+  default     = "de-prog-migration-task"
+}
+
+variable "source_schema_name" {
+  description = "Source schema name to replicate"
+  type        = string
+  default     = "dev"  # Your MySQL schema from setup.sql
+}

@@ -45,3 +45,15 @@ output "dms_s3_role_arn" {
   description = "ARN of the DMS S3 access role"
   value       = aws_iam_role.dms_s3_access_role.arn
 }
+
+# ADD THIS TO modules/dms/outputs.tf
+
+output "migration_task_arn" {
+  description = "ARN of the DMS migration task"
+  value       = aws_dms_replication_task.migration_task.replication_task_arn
+}
+
+output "migration_task_id" {
+  description = "ID of the DMS migration task"
+  value       = aws_dms_replication_task.migration_task.replication_task_id
+}

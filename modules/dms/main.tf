@@ -204,24 +204,96 @@ resource "aws_iam_role_policy_attachment" "dms_s3_access" {
 }
 
 # Create DMS target endpoint (S3)
+# REPLACE the aws_dms_endpoint "target" resource with this:
+
 resource "aws_dms_endpoint" "target" {
   endpoint_id   = var.target_endpoint_id
   endpoint_type = "target"
   engine_name   = "s3"
 
-  # S3 target configuration
+  # S3 target configuration with required settings
   s3_settings {
     bucket_name             = var.s3_bucket_name
     bucket_folder           = "bronze_data"
     service_access_role_arn = aws_iam_role.dms_s3_access_role.arn
     
-    # Endpoint settings as requested
-    add_column_name = true  # This is the addcolname setting
+    # Required S3 settings for DMS
+    add_column_name         = true
+    timestamp_column_name   = "dms_timestamp"  # Required timestamp column
+    data_format            = "parquet"         # Better for data engineering
+    compression_type       = "GZIP"            # Compress files
   }
 
   tags = var.common_tags
 
   depends_on = [
     aws_iam_role_policy_attachment.dms_s3_access
+  ]
+}
+
+# ADD THIS TO modules/dms/main.tf (after the target endpoint)
+
+# Create DMS migration task
+resource "aws_dms_replication_task" "migration_task" {
+  
+  migration_type              = "full-load-and-cdc"  # Full load + ongoing replication
+  replication_instance_arn    = aws_dms_replication_instance.main.replication_instance_arn
+  replication_task_id         = var.migration_task_id
+  source_endpoint_arn         = aws_dms_endpoint.source.endpoint_arn
+  target_endpoint_arn         = aws_dms_endpoint.target.endpoint_arn
+
+  # Table mappings - specify which schema/tables to replicate
+  table_mappings = jsonencode({
+    rules = [
+      {
+        rule-type = "selection"
+        rule-id   = "1"
+        rule-name = "1"
+        object-locator = {
+          schema-name = var.source_schema_name
+          table-name  = "%"  # All tables in the schema
+        }
+        rule-action = "include"
+      }
+    ]
+  })
+
+  # Task settings (using defaults mostly)
+  replication_task_settings = jsonencode({
+    TargetMetadata = {
+      TargetSchema = ""
+      SupportLobs = true
+      FullLobMode = false
+      LobChunkSize = 0
+      LimitedSizeLobMode = true
+      LobMaxSize = 32
+    }
+    FullLoadSettings = {
+      TargetTablePrepMode = "DROP_AND_CREATE"
+    }
+    Logging = {
+      EnableLogging = true
+      LogComponents = [
+        {
+          Id       = "SOURCE_UNLOAD"
+          Severity = "LOGGER_SEVERITY_DEFAULT"
+        },
+        {
+          Id       = "TARGET_LOAD"
+          Severity = "LOGGER_SEVERITY_DEFAULT"
+        }
+      ]
+    }
+  })
+
+  # Don't start automatically (manual startup as requested)
+  start_replication_task = false
+
+  tags = var.common_tags
+
+  depends_on = [
+    aws_dms_endpoint.source,
+    aws_dms_endpoint.target,
+    aws_dms_replication_instance.main
   ]
 }
