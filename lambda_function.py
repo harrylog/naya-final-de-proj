@@ -115,14 +115,20 @@ def update_customers(cursor):
         cursor.execute(update_query, (new_email, new_phone, customerId))
 
 # Delete customer data
+# Delete customer data - FIX: Delete orders first
 def delete_customers(cursor):
     cursor.execute("SELECT customerId FROM Customer")
     customer_ids = [row[0] for row in cursor.fetchall()]
 
     if customer_ids:
         customerId = random.choice(customer_ids)
-        delete_query = """DELETE FROM Customer WHERE customerId = %s"""
-        cursor.execute(delete_query, (customerId,))
+        
+        # First delete related orders and order details
+        cursor.execute("DELETE od FROM orderDetails od JOIN Orders o ON od.orderId = o.orderId WHERE o.orderCustomerId = %s", (customerId,))
+        cursor.execute("DELETE FROM Orders WHERE orderCustomerId = %s", (customerId,))
+        
+        # Then delete the customer
+        cursor.execute("DELETE FROM Customer WHERE customerId = %s", (customerId,))
 
 
 def insert_orders_and_order_details(cursor, num_orders):
