@@ -75,3 +75,18 @@ module "dms_migration" {
   
   common_tags = var.common_tags
 }
+
+# ADD THIS TO main.tf (after the DMS module)
+
+# Call the Secrets Manager module for database credentials
+module "rds_secrets" {
+  source = "./modules/secrets"
+  
+  # Pass RDS connection details
+  rds_hostname = split(":", module.mysql_database.db_endpoint_with_port)[0]
+  rds_username = var.master_username
+  rds_password = var.master_password
+  rds_dbname   = var.db_name
+  
+  common_tags = var.common_tags
+}

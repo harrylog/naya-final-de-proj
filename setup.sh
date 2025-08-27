@@ -4,7 +4,7 @@
 touch main.tf variables.tf outputs.tf terraform.tfvars
 
 # Module directories
-MODULES=(vpc rds s3 iam)
+MODULES=(rds s3 iam dms secrets)
 for module in "${MODULES[@]}"; do
     mkdir -p "modules/$module"
     touch "modules/$module/main.tf"

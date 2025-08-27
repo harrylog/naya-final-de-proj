@@ -67,3 +67,15 @@ output "dms_replication_instance_id" {
   description = "ID of the DMS replication instance"  
   value       = module.dms_migration.replication_instance_id
 }
+
+# ADD THIS TO outputs.tf
+
+output "rds_secret_arn" {
+  description = "ARN of the RDS credentials secret"
+  value       = module.rds_secrets.secret_arn
+}
+
+output "rds_secret_name" {
+  description = "Name of the RDS credentials secret"
+  value       = module.rds_secrets.secret_name
+}
