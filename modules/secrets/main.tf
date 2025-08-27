@@ -19,7 +19,7 @@ resource "aws_secretsmanager_secret_version" "rds_credentials" {
   secret_id = aws_secretsmanager_secret.rds_credentials.id
   
   secret_string = jsonencode({
-    hostname = var.rds_hostname
+    host     = var.rds_hostname  # Using existing variable rds_hostname
     username = var.rds_username  
     password = var.rds_password
     dbname   = var.rds_dbname

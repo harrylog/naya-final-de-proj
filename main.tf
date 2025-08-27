@@ -90,3 +90,15 @@ module "rds_secrets" {
   
   common_tags = var.common_tags
 }
+
+# ADD THIS TO main.tf (after the secrets module)
+
+# Call the Lambda module for data generation
+module "data_generator" {
+  source = "./modules/lambda"
+  
+  secret_name     = module.rds_secrets.secret_name
+  rds_secret_arn  = module.rds_secrets.secret_arn
+  
+  common_tags = var.common_tags
+}
