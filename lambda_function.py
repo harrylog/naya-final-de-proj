@@ -50,13 +50,17 @@ def create_connection():
     try:
         connection = mysql.connector.connect(
             #host=db_credentials["host"],
-            host=db_credentials["hostname"],
+            #host=db_credentials["hostname"],
+            host=db_credentials["host"],
             user=db_credentials["username"],
             password=db_credentials["password"],
             database=db_credentials["dbname"]
         )
         if connection.is_connected():
             print("Connected to MySQL database")
+            cursor = connection.cursor()
+            cursor.execute("USE dev;")
+            cursor.close()
         return connection
     except Error as e:
         print(f"Error while connecting to MySQL: {e}")

@@ -92,6 +92,15 @@ data "archive_file" "lambda_zip" {
   type        = "zip"
   source_file = var.lambda_source_file
   output_path = "${path.module}/lambda_function.zip"
+  
+  # Force recreation when file content changes
+  depends_on = [local_file.lambda_code_trigger]
+}
+
+# Detect changes in Lambda code
+resource "local_file" "lambda_code_trigger" {
+  content  = filemd5(var.lambda_source_file)
+  filename = "${path.module}/.lambda_hash"
 }
 
 # Create Lambda function

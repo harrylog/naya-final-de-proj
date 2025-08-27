@@ -62,3 +62,31 @@ secrets.txt
 
 # AWS CLI cache
 .aws/cli/cache/
+
+
+# Terraform generated files
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+*.tfplan
+
+# Lambda build artifacts  
+modules/lambda/layer/
+modules/lambda/*.zip
+modules/lambda/.lambda_hash
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
