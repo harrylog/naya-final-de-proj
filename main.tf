@@ -132,3 +132,16 @@ module "redshift_warehouse" {
   
   common_tags = var.common_tags
 }
+
+# ADD THIS TO main.tf (after the Redshift module)
+
+# Call the Step Functions module for ETL orchestration
+module "etl_orchestration" {
+  source = "./modules/stepfunctions"
+  
+  redshift_workgroup_arn   = module.redshift_warehouse.workgroup_arn
+  redshift_workgroup_name  = "de-proj-redshift-workgroup"
+  secrets_policy_arn       = module.iam_policies.s3_policy_arn # or create dedicated secrets policy
+  
+  common_tags = var.common_tags
+}
