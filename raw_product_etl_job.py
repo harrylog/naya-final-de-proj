@@ -14,7 +14,6 @@ from awsglue.utils import getResolvedOptions
 from awsglue.job import Job
 
 #initialize all the variables needed
-source_bucket = "naya-de-rds-cdc-s3"
 folder_name = "bronze_data"
 processed_folder_name = "silver_data"
 db_name = "dev"
