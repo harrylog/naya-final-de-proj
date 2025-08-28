@@ -108,12 +108,15 @@ module "data_generator" {
 # Call the Glue module for ETL processing
 # UPDATE the Glue module call in main.tf to include Redshift secret:
 
+# UPDATE the Glue module call in main.tf:
+
 module "glue_etl" {
   source = "./modules/glue"
   
   s3_bucket_name      = module.data_lake.bucket_name
   s3_policy_arn       = module.iam_policies.s3_policy_arn
   redshift_secret_arn = module.redshift_warehouse.secret_arn
+  redshift_endpoint   = module.redshift_warehouse.endpoint_address
   
   common_tags = var.common_tags
 }

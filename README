@@ -159,3 +159,16 @@ port 3306
 username admin
 password hrylog8DVA02
 rds pwd naya-de-proj-pwd-mysql8
+
+
+# Destroy just Redshift module (saves ~$53/day)
+terraform destroy -target=module.redshift_warehouse
+
+# Destroy VPC endpoints too (if not needed for other services)  
+terraform destroy -target=module.glue_etl.aws_vpc_endpoint.redshift
+terraform destroy -target=module.glue_etl.aws_vpc_endpoint.secretsmanager
+terraform destroy -target=module.glue_etl.aws_vpc_endpoint.sts
+terraform destroy -target=module.glue_etl.aws_vpc_endpoint.s3_gateway
+
+# Keep: RDS (~$0.40/day), DMS (~$0.40/day), S3/Lambda (minimal)
+# Total cost drops from ~$55/day to ~$2/day

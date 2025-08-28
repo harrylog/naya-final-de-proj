@@ -489,3 +489,98 @@ resource "aws_security_group" "vpc_endpoint_sg" {
   })
 }
 
+# ADD TO modules/glue/main.tf (after other VPC endpoints)
+
+# Redshift Serverless Interface VPC Endpoint
+# REPLACE the aws_vpc_endpoint "redshift" resource in modules/glue/main.tf with this:
+
+# Get specific subnets in supported AZs for Redshift Serverless
+data "aws_subnets" "redshift_compatible" {
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.default.id]
+  }
+  
+  filter {
+    name   = "availability-zone"
+    values = ["us-east-1a", "us-east-1b"] # Use commonly supported AZs
+  }
+}
+
+# Redshift Serverless Interface VPC Endpoint (with specific subnets)
+resource "aws_vpc_endpoint" "redshift" {
+  vpc_id       = data.aws_vpc.default.id
+  service_name = "com.amazonaws.${data.aws_region.current.name}.redshift-serverless"
+  
+  vpc_endpoint_type   = "Interface"
+  subnet_ids          = data.aws_subnets.redshift_compatible.ids
+  security_group_ids  = [aws_security_group.vpc_endpoint_sg_open.id]
+  private_dns_enabled = true
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = "*"
+        Action = "redshift-serverless:*"
+        Resource = "*"
+      }
+    ]
+  })
+
+  tags = merge(var.common_tags, {
+    Name = "de-prog-redshift-endpoint"
+  })
+}
+
+# Open security group for Redshift endpoint (as requested)
+resource "aws_security_group" "vpc_endpoint_sg_open" {
+  name_prefix = "vpc-endpoint-open-sg"
+  description = "Open security group for VPC endpoints"
+  vpc_id      = data.aws_vpc.default.id
+
+  # Allow all TCP traffic (as requested - not recommended for production)
+  ingress {
+    description = "All TCP traffic"
+    from_port   = 0
+    to_port     = 65535
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    description = "All outbound traffic"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = merge(var.common_tags, {
+    Name = "vpc-endpoints-open-security-group"
+  })
+}
+
+# ADD TO modules/glue/main.tf (after VPC endpoints)
+
+# Glue connection to Redshift
+resource "aws_glue_connection" "redshift_connection" {
+  name = "redshift-connection"
+  
+  connection_type = "JDBC"
+  
+  connection_properties = {
+    JDBC_CONNECTION_URL = "jdbc:redshift://${var.redshift_endpoint}:5439/production"
+    USERNAME           = "admin"
+    PASSWORD           = var.redshift_secret_arn # Reference to secret
+  }
+  
+  physical_connection_requirements {
+    availability_zone      = data.aws_subnets.default.ids[0]
+    security_group_id_list = [aws_security_group.vpc_endpoint_sg_open.id]
+    subnet_id             = data.aws_subnets.default.ids[0]
+  }
+
+  tags = var.common_tags
+}
