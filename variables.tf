@@ -62,3 +62,12 @@ variable "s3_bucket_name" {
   type        = string
   default     = "naya-de-rds-cdc-s3"
 }
+
+# ADD THIS TO variables.tf
+
+variable "redshift_admin_password" {
+  description = "Admin password for Redshift serverless cluster"
+  type        = string
+  default     = "RedshiftAdmin123!"
+  sensitive   = true
+}

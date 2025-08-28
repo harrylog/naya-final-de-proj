@@ -58,3 +58,10 @@ variable "common_tags" {
   type        = map(string)
   default     = {}
 }
+
+# ADD THIS TO modules/glue/variables.tf
+
+variable "redshift_secret_arn" {
+  description = "ARN of the Redshift credentials secret"
+  type        = string
+}

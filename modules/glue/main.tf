@@ -324,3 +324,168 @@ resource "aws_glue_job" "orderdetails_etl" {
   tags = var.common_tags
   depends_on = [aws_s3_object.orderdetails_glue_script]
 }
+# ADD THESE DATA SOURCES TO THE TOP of modules/glue/main.tf (after existing data sources)
+
+# Get default VPC for VPC endpoints
+data "aws_vpc" "default" {
+  default = true
+}
+
+# Get all subnets in the default VPC
+data "aws_subnets" "default" {
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.default.id]
+  }
+}
+# ADD THESE TO modules/glue/main.tf (after existing resources)
+
+# Get route tables for VPC endpoints
+data "aws_route_tables" "default" {
+  vpc_id = data.aws_vpc.default.id
+}
+
+# Create Redshift Secrets Manager policy
+resource "aws_iam_policy" "glue_redshift_secrets" {
+  name        = "de-proj-get-redshift-secret-policy"
+  description = "Allow Glue to access Redshift credentials from Secrets Manager"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "secretsmanager:GetSecretValue",
+          "secretsmanager:DescribeSecret"
+        ]
+        Resource = var.redshift_secret_arn
+      }
+    ]
+  })
+
+  tags = var.common_tags
+}
+
+# Attach Redshift secrets policy to Glue role
+resource "aws_iam_role_policy_attachment" "glue_redshift_secrets" {
+  role       = aws_iam_role.glue_role.name
+  policy_arn = aws_iam_policy.glue_redshift_secrets.arn
+}
+
+# Attach VPC full access to Glue role
+resource "aws_iam_role_policy_attachment" "glue_vpc_access" {
+  role       = aws_iam_role.glue_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonVPCFullAccess"
+}
+
+# S3 Gateway VPC Endpoint
+resource "aws_vpc_endpoint" "s3_gateway" {
+  vpc_id       = data.aws_vpc.default.id
+  service_name = "com.amazonaws.${data.aws_region.current.name}.s3"
+  
+  vpc_endpoint_type = "Gateway"
+  route_table_ids   = data.aws_route_tables.default.ids
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = "*"
+        Action = "s3:*"
+        Resource = "*"
+      }
+    ]
+  })
+
+  tags = merge(var.common_tags, {
+    Name = "de-proj-s3-gateway"
+  })
+}
+
+# Get current AWS region
+data "aws_region" "current" {}
+
+# Secrets Manager Interface VPC Endpoint
+resource "aws_vpc_endpoint" "secretsmanager" {
+  vpc_id       = data.aws_vpc.default.id
+  service_name = "com.amazonaws.${data.aws_region.current.name}.secretsmanager"
+  
+  vpc_endpoint_type   = "Interface"
+  subnet_ids          = data.aws_subnets.default.ids
+  security_group_ids  = [aws_security_group.vpc_endpoint_sg.id]
+  private_dns_enabled = true
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = "*"
+        Action = "secretsmanager:*"
+        Resource = "*"
+      }
+    ]
+  })
+
+  tags = merge(var.common_tags, {
+    Name = "de-proj-secret-mngr-endpoint"
+  })
+}
+
+# STS Interface VPC Endpoint
+resource "aws_vpc_endpoint" "sts" {
+  vpc_id       = data.aws_vpc.default.id
+  service_name = "com.amazonaws.${data.aws_region.current.name}.sts"
+  
+  vpc_endpoint_type   = "Interface"
+  subnet_ids          = data.aws_subnets.default.ids
+  security_group_ids  = [aws_security_group.vpc_endpoint_sg.id]
+  private_dns_enabled = true
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = "*"
+        Action = "sts:*"
+        Resource = "*"
+      }
+    ]
+  })
+
+  tags = merge(var.common_tags, {
+    Name = "de-proj-sts-endpoint"
+  })
+}
+
+# Security group for VPC endpoints
+resource "aws_security_group" "vpc_endpoint_sg" {
+  name_prefix = "vpc-endpoint-sg"
+  description = "Security group for VPC endpoints"
+  vpc_id      = data.aws_vpc.default.id
+
+  # Allow HTTPS traffic for interface endpoints
+  ingress {
+    description = "HTTPS"
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = [data.aws_vpc.default.cidr_block]
+  }
+
+  egress {
+    description = "All outbound traffic"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = merge(var.common_tags, {
+    Name = "vpc-endpoints-security-group"
+  })
+}
+

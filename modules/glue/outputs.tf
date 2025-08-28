@@ -25,3 +25,20 @@ output "etl_job_arn" {
   description = "ARN of the Glue ETL job"
   value       = aws_glue_job.product_etl.arn
 }
+
+# ADD THESE TO modules/glue/outputs.tf
+
+output "s3_gateway_endpoint_id" {
+  description = "ID of the S3 gateway VPC endpoint"
+  value       = aws_vpc_endpoint.s3_gateway.id
+}
+
+output "secretsmanager_endpoint_id" {
+  description = "ID of the Secrets Manager VPC endpoint"
+  value       = aws_vpc_endpoint.secretsmanager.id
+}
+
+output "sts_endpoint_id" {
+  description = "ID of the STS VPC endpoint"
+  value       = aws_vpc_endpoint.sts.id
+}
