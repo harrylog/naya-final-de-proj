@@ -584,3 +584,92 @@ resource "aws_glue_connection" "redshift_connection" {
 
   tags = var.common_tags
 }
+
+
+# ADD THESE LOADING JOBS TO modules/glue/main.tf
+
+# Upload loading job scripts to S3
+resource "aws_s3_object" "load_product_script" {
+  bucket = var.s3_bucket_name
+  key    = "glue-scripts/de-proj-load-product-job.py"
+  source = "de-proj-load-product-job.py"
+  etag   = filemd5("de-proj-load-product-job.py")
+  tags   = var.common_tags
+}
+
+resource "aws_s3_object" "load_customer_script" {
+  bucket = var.s3_bucket_name
+  key    = "glue-scripts/de-proj0load-customer-job.py"
+  source = "de-proj0load-customer-job.py"
+  etag   = filemd5("de-proj0load-customer-job.py")
+  tags   = var.common_tags
+}
+
+# Create loading jobs
+resource "aws_glue_job" "load_product" {
+  name         = "de-proj-load-product-job"
+  role_arn     = aws_iam_role.glue_role.arn
+  glue_version = "4.0"
+  
+  connections = [aws_glue_connection.redshift_connection.name]
+
+  command {
+    script_location = "s3://${var.s3_bucket_name}/glue-scripts/de-proj-load-product-job.py"
+    python_version  = "3"
+  }
+
+  default_arguments = {
+    "--job-language"                     = "python"
+    "--job-bookmark-option"             = "job-bookmark-enable"
+    "--enable-metrics"                  = ""
+    "--enable-spark-ui"                 = "true"
+    "--enable-glue-datacatalog"         = "true"
+    "--enable-continuous-cloudwatch-log" = "true"
+    "--TempDir"                         = "s3://${var.s3_bucket_name}/temporary/"
+  }
+
+  execution_property {
+    max_concurrent_runs = 1
+  }
+
+  worker_type = "G.1X"
+  number_of_workers = 2
+  tags = var.common_tags
+  
+  depends_on = [aws_s3_object.load_product_script]
+}
+
+# Similar pattern for other loading jobs...
+resource "aws_glue_job" "load_customer" {
+  name         = "de-proj-load-customer-job"
+  role_arn     = aws_iam_role.glue_role.arn
+  glue_version = "4.0"
+  
+  connections = [aws_glue_connection.redshift_connection.name]
+
+  command {
+    script_location = "s3://${var.s3_bucket_name}/glue-scripts/de-proj0load-customer-job.py"
+    python_version  = "3"
+  }
+
+  # Same default arguments...
+  default_arguments = {
+    "--job-language"                     = "python"
+    "--job-bookmark-option"             = "job-bookmark-enable"
+    "--enable-metrics"                  = ""
+    "--enable-spark-ui"                 = "true"
+    "--enable-glue-datacatalog"         = "true"
+    "--enable-continuous-cloudwatch-log" = "true"
+    "--TempDir"                         = "s3://${var.s3_bucket_name}/temporary/"
+  }
+
+  execution_property {
+    max_concurrent_runs = 1
+  }
+
+  worker_type = "G.1X"
+  number_of_workers = 2
+  tags = var.common_tags
+  
+  depends_on = [aws_s3_object.load_customer_script]
+}
