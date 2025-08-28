@@ -14,16 +14,17 @@ from awsglue.utils import getResolvedOptions
 from awsglue.job import Job
 
 #initialize all the variables needed
-source_bucket = ""
+source_bucket = "naya-de-rds-cdc-s3"
 folder_name = "bronze_data"
 processed_folder_name = "silver_data"
 db_name = "dev"
 table_name = "Product"
 
 # Set up catalog parameters
-glue_database = "data-engineering-project-glue-database"
-glue_table_name = "raw_data_product"
-
+# Change these lines:
+glue_database = "de-proj-glue-db"  # Match your Terraform database name
+source_bucket = "naya-de-rds-cdc-s3"  # Add your actual bucket name
+glue_table_name= "raw_data_product"
 #set up the spark contexts, glue contexts and initialize job
 sc = SparkContext.getOrCreate()
 glueContext = GlueContext(sc)
