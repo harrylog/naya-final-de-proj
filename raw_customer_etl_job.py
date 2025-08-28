@@ -62,16 +62,16 @@ if customer_df_from_catalog.count() > 0:
                                         , col("cust_address")\
                                         , col("cust_country")\
                                         , col("cust_city")\
-                                        , col("cust_name"))
+                                        , col("name"))
     #create dataframe with new columns 
     customer_final_df = renamed_customer.withColumn("hash_value",sha2(concatenated_customer_fields, 256))\
                         .withColumn("record_start_ts",current_ts)\
                         .withColumn("record_end_ts",record_end_ts)\
                         .withColumn("ingestion_date", current_date)\
                         .withColumn("active_flag",active_flag)\
-                        .withColumn("cust_first_name", split(renamed_customer["cust_name"], " ")[0])\
-                        .withColumn("cust_last_name", split(renamed_customer["cust_name"], " ")[1])\
-                        .drop("cust_name")\
+                        .withColumn("cust_first_name", split(renamed_customer["name"], " ")[0])\
+                        .withColumn("cust_last_name", split(renamed_customer["name"], " ")[1])\
+                        .drop("name")\
 
     #create glue dynamicframe from the dataframe
     customer_final_dyf = DynamicFrame.fromDF(customer_final_df,glueContext,"customer_final_dyf")  
