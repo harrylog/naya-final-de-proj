@@ -14,7 +14,9 @@ resource "aws_iam_policy" "s3_data_lake_policy" {
         Action = [
           "s3:PutObject",
           "s3:DeleteObject", 
-          "s3:PutObjectTagging"
+          "s3:PutObjectTagging",
+           "s3:GetObject",  
+           "s3:GetObjectVersion" 
         ]
         Resource = [
           "${var.s3_bucket_arn}/*"  # All objects in bucket
