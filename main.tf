@@ -102,3 +102,15 @@ module "data_generator" {
   
   common_tags = var.common_tags
 }
+
+# ADD THIS TO main.tf (after the Lambda module)
+
+# Call the Glue module for ETL processing
+module "glue_etl" {
+  source = "./modules/glue"
+  
+  s3_bucket_name = module.data_lake.bucket_name
+  s3_policy_arn  = module.iam_policies.s3_policy_arn
+  
+  common_tags = var.common_tags
+}
