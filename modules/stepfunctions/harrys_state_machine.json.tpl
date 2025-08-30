@@ -13,7 +13,7 @@
               "Type": "Task",
               "Resource": "arn:aws:states:::glue:startJobRun.sync",
               "Parameters": {
-                "JobName": "de-proj-product-etl-job"
+               "JobName": "${product_transform_job}"
               },
               "End": true,
               "Retry": [
@@ -34,7 +34,7 @@
               "Type": "Task",
               "Resource": "arn:aws:states:::glue:startJobRun.sync",
               "Parameters": {
-                "JobName": "de-proj-customer-etl-job"
+               "JobName": "${customer_transform_job}"
               },
               "End": true,
               "Retry": [
@@ -55,7 +55,7 @@
               "Type": "Task",
               "Resource": "arn:aws:states:::glue:startJobRun.sync",
               "Parameters": {
-                "JobName": "de-proj-orders-etl-job"
+                "JobName": "${orders_transform_job}"
               },
               "End": true,
               "Retry": [
@@ -76,7 +76,7 @@
               "Type": "Task",
               "Resource": "arn:aws:states:::glue:startJobRun.sync",
               "Parameters": {
-                "JobName": "de-proj-orderdetails-etl-job"
+                "JobName": "${orderdetails_transform_job}"
               },
               "End": true,
               "Retry": [
@@ -103,8 +103,7 @@
               "Type": "Task",
               "Resource": "arn:aws:states:::glue:startJobRun.sync",
               "Parameters": {
-                "JobName": "de-proj-load-product-job"
-              },
+              "JobName": "${product_load_job}"              },
               "Next": "ExecuteProductSP",
               "ResultPath": "$.load_result",
               "Retry": [
@@ -122,9 +121,8 @@
               "Parameters": {
                 "Database": "production",
                 "Sql": "CALL sales.sp_merge_dim_product();",
-                "WorkgroupName": "de-proj-redshift-workgroup",
-                "SecretArn": "arn:aws:secretsmanager:us-east-1:672711092573:secret:de-proj-redshift-secret-TsglUx"
-              },
+                "WorkgroupName": "${redshift_workgroup_name}",
+                "SecretArn": "${redshift_secret_arn}"              },
               "ResultPath": "$.sp_result",
               "Next": "WaitProductSP"
             },
@@ -176,7 +174,7 @@
               "Type": "Task",
               "Resource": "arn:aws:states:::glue:startJobRun.sync",
               "Parameters": {
-                "JobName": "de-proj0load-customer-job"
+                "JobName": "${customer_load_job}"
               },
               "Next": "ExecuteCustomerSP",
               "ResultPath": "$.load_result",
@@ -195,9 +193,8 @@
               "Parameters": {
                 "Database": "production",
                 "Sql": "CALL sales.sp_merge_dim_customer();",
-                "WorkgroupName": "de-proj-redshift-workgroup",
-                "SecretArn": "arn:aws:secretsmanager:us-east-1:672711092573:secret:de-proj-redshift-secret-TsglUx"
-              },
+                "WorkgroupName": "${redshift_workgroup_name}",
+                "SecretArn": "${redshift_secret_arn}"              },
               "ResultPath": "$.sp_result",
               "Next": "WaitCustomerSP"
             },
@@ -255,7 +252,7 @@
               "Type": "Task",
               "Resource": "arn:aws:states:::glue:startJobRun.sync",
               "Parameters": {
-                "JobName": "de-proj-load-order-job"
+                "JobName": "${orders_load_job}"
               },
               "End": true,
               "Retry": [
@@ -276,7 +273,7 @@
               "Type": "Task",
               "Resource": "arn:aws:states:::glue:startJobRun.sync",
               "Parameters": {
-                "JobName": "de-proj-load-ordersdetails-job"
+                "JobName": "${orderdetails_load_job}"
               },
               "End": true,
               "Retry": [

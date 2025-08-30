@@ -123,3 +123,18 @@ module "glue_etl" {
   
   common_tags = var.common_tags
 }
+
+
+# ADD THIS TO main.tf (after the Glue module)
+
+# Call the Step Functions module for ETL orchestration
+module "etl_orchestration" {
+  source = "./modules/stepfunctions"
+  
+  redshift_workgroup_arn   = module.redshift_warehouse.workgroup_arn
+  redshift_workgroup_name  = module.redshift_warehouse.workgroup_id
+  redshift_secret_arn      = module.redshift_warehouse.secret_arn
+  secrets_policy_arn       = module.iam_policies.s3_policy_arn
+  
+  common_tags = var.common_tags
+}
