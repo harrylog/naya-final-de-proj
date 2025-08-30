@@ -1,0 +1,169 @@
+{
+  "Comment": "ETL Pipeline Orchestration",
+  "StartAt": "TransformationJobsParallel",
+  "States": {
+    "ExecuteStoredProceduresParallel": {
+      "Branches": [
+        {
+          "StartAt": "ExecuteProductSP",
+          "States": {
+            "ExecuteProductSP": {
+              "End": true,
+              "Parameters": {
+                "Database": "production",
+                "Sql": "CALL sales.sp_merge_dim_product();",
+                "WorkgroupName": "de-proj-redshift-workgroup"
+              },
+              "Resource": "arn:aws:states:::aws-sdk:redshiftdata:executeStatement",
+              "Type": "Task"
+            }
+          }
+        },
+        {
+          "StartAt": "ExecuteCustomerSP",
+          "States": {
+            "ExecuteCustomerSP": {
+              "End": true,
+              "Parameters": {
+                "Database": "production",
+                "Sql": "CALL sales.sp_merge_dim_customer();",
+                "WorkgroupName": "de-proj-redshift-workgroup"
+              },
+              "Resource": "arn:aws:states:::aws-sdk:redshiftdata:executeStatement",
+              "Type": "Task"
+            }
+          }
+        }
+      ],
+      "Next": "WaitForCompletion",
+      "Type": "Parallel"
+    },
+    "LoadDimensionsParallel": {
+      "Branches": [
+        {
+          "StartAt": "LoadProductDimension",
+          "States": {
+            "LoadProductDimension": {
+              "End": true,
+              "Parameters": {
+                "JobName": "de-proj-load-product-job"
+              },
+              "Resource": "arn:aws:states:::glue:startJobRun.sync",
+              "Type": "Task"
+            }
+          }
+        },
+        {
+          "StartAt": "LoadCustomerDimension",
+          "States": {
+            "LoadCustomerDimension": {
+              "End": true,
+              "Parameters": {
+                "JobName": "de-proj-load-customer-job"
+              },
+              "Resource": "arn:aws:states:::glue:startJobRun.sync",
+              "Type": "Task"
+            }
+          }
+        }
+      ],
+      "Next": "ExecuteStoredProceduresParallel",
+      "Type": "Parallel"
+    },
+    "LoadFactsParallel": {
+      "Branches": [
+        {
+          "StartAt": "LoadOrdersFact",
+          "States": {
+            "LoadOrdersFact": {
+              "End": true,
+              "Parameters": {
+                "JobName": "de-proj-load-order-job"
+              },
+              "Resource": "arn:aws:states:::glue:startJobRun.sync",
+              "Type": "Task"
+            }
+          }
+        },
+        {
+          "StartAt": "LoadOrderDetailsFact",
+          "States": {
+            "LoadOrderDetailsFact": {
+              "End": true,
+              "Parameters": {
+                "JobName": "de-proj-load-ordersdetails-job"
+              },
+              "Resource": "arn:aws:states:::glue:startJobRun.sync",
+              "Type": "Task"
+            }
+          }
+        }
+      ],
+      "End": true,
+      "Type": "Parallel"
+    },
+    "TransformationJobsParallel": {
+      "Branches": [
+        {
+          "StartAt": "TransformProducts",
+          "States": {
+            "TransformProducts": {
+              "End": true,
+              "Parameters": {
+                "JobName": "de-proj-product-etl-job"
+              },
+              "Resource": "arn:aws:states:::glue:startJobRun.sync",
+              "Type": "Task"
+            }
+          }
+        },
+        {
+          "StartAt": "TransformCustomers",
+          "States": {
+            "TransformCustomers": {
+              "End": true,
+              "Parameters": {
+                "JobName": "de-proj-customer-etl-job"
+              },
+              "Resource": "arn:aws:states:::glue:startJobRun.sync",
+              "Type": "Task"
+            }
+          }
+        },
+        {
+          "StartAt": "TransformOrders",
+          "States": {
+            "TransformOrders": {
+              "End": true,
+              "Parameters": {
+                "JobName": "de-proj-orders-etl-job"
+              },
+              "Resource": "arn:aws:states:::glue:startJobRun.sync",
+              "Type": "Task"
+            }
+          }
+        },
+        {
+          "StartAt": "TransformOrderDetails",
+          "States": {
+            "TransformOrderDetails": {
+              "End": true,
+              "Parameters": {
+                "JobName": "de-proj-orderdetails-etl-job"
+              },
+              "Resource": "arn:aws:states:::glue:startJobRun.sync",
+              "Type": "Task"
+            }
+          }
+        }
+      ],
+      "Next": "LoadDimensionsParallel",
+      "Type": "Parallel"
+    },
+    "WaitForCompletion": {
+      "Next": "LoadFactsParallel",
+      "Seconds": 5,
+      "Type": "Wait"
+    }
+  }
+}
