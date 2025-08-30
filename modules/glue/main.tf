@@ -738,3 +738,20 @@ resource "aws_glue_job" "load_orderdetails" {
   number_of_workers = 2
   tags = var.common_tags
 }
+
+# Add these missing script uploads
+resource "aws_s3_object" "load_orders_script" {
+  bucket = var.s3_bucket_name
+  key    = "glue-scripts/de-proj-load-order-job.py"
+  source = "de-proj-load-order-job.py"
+  etag   = filemd5("de-proj-load-order-job.py")
+  tags   = var.common_tags
+}
+
+resource "aws_s3_object" "load_orderdetails_script" {
+  bucket = var.s3_bucket_name
+  key    = "glue-scripts/de-proj-load-ordersdetails-job.py"
+  source = "de-proj-load-ordersdetails-job.py"
+  etag   = filemd5("de-proj-load-ordersdetails-job.py")
+  tags   = var.common_tags
+}

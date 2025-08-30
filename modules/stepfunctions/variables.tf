@@ -62,8 +62,8 @@ variable "product_load_job" {
 variable "customer_load_job" {
   description = "Name of the customer loading Glue job"
   type        = string
-  default     = "de-proj-load-customer-job"
-}
+ default     = "de-proj0load-customer-job"
+ }
 
 variable "orders_load_job" {
   description = "Name of the orders loading Glue job"
