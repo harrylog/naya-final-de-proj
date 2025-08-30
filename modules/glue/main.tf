@@ -641,7 +641,7 @@ resource "aws_glue_job" "load_product" {
 
 # Similar pattern for other loading jobs...
 resource "aws_glue_job" "load_customer" {
-  name         = "de-proj-load-customer-job"
+  name         = "de-proj0load-customer-job"
   role_arn     = aws_iam_role.glue_role.arn
   glue_version = "4.0"
   
@@ -672,4 +672,69 @@ resource "aws_glue_job" "load_customer" {
   tags = var.common_tags
   
   depends_on = [aws_s3_object.load_customer_script]
+}
+
+# Orders loading job
+resource "aws_glue_job" "load_orders" {
+  name         = "de-proj-load-order-job"
+  role_arn     = aws_iam_role.glue_role.arn
+  glue_version = "5.0"  # Match the version from console
+  
+  connections = [aws_glue_connection.redshift_connection.name]
+
+  command {
+    script_location = "s3://${var.s3_bucket_name}/glue-scripts/de-proj-load-order-job.py"
+    python_version  = "3"
+  }
+
+  default_arguments = {
+    "--job-language"                     = "python"
+    "--job-bookmark-option"             = "job-bookmark-enable"
+    "--enable-metrics"                  = ""
+    "--enable-spark-ui"                 = "true"
+    "--enable-glue-datacatalog"         = "true"
+    "--enable-continuous-cloudwatch-log" = "true"
+    "--TempDir"                         = "s3://${var.s3_bucket_name}/temporary/"
+  }
+
+  execution_property {
+    max_concurrent_runs = 1
+  }
+
+  worker_type = "G.1X"
+  number_of_workers = 2
+  tags = var.common_tags
+}
+
+# OrderDetails loading job
+resource "aws_glue_job" "load_orderdetails" {
+  name         = "de-proj-load-ordersdetails-job"
+  role_arn     = aws_iam_role.glue_role.arn
+  glue_version = "5.0"
+  
+  connections = [aws_glue_connection.redshift_connection.name]
+
+  command {
+    script_location = "s3://${var.s3_bucket_name}/glue-scripts/de-proj-load-ordersdetails-job.py"
+    python_version  = "3"
+  }
+
+  # Same default_arguments and configuration...
+  default_arguments = {
+    "--job-language"                     = "python"
+    "--job-bookmark-option"             = "job-bookmark-enable"
+    "--enable-metrics"                  = ""
+    "--enable-spark-ui"                 = "true"
+    "--enable-glue-datacatalog"         = "true"
+    "--enable-continuous-cloudwatch-log" = "true"
+    "--TempDir"                         = "s3://${var.s3_bucket_name}/temporary/"
+  }
+
+  execution_property {
+    max_concurrent_runs = 1
+  }
+
+  worker_type = "G.1X"
+  number_of_workers = 2
+  tags = var.common_tags
 }

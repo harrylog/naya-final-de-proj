@@ -1,6 +1,6 @@
 -------------------------------->
 --Create Orders Fact Table
-CREATE TABLE sales_uk.fact_orders (
+CREATE TABLE sales.fact_orders (
     order_id_ character varying(64) NOT NULL ENCODE lzo,
     order_customer_id character varying(64) ENCODE lzo,
     order_date date ENCODE az64,
