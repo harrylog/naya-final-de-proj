@@ -102,28 +102,7 @@ module "data_generator" {
   
   common_tags = var.common_tags
 }
-
-# ADD THIS TO main.tf (after the Lambda module)
-
-# Call the Glue module for ETL processing
-# UPDATE the Glue module call in main.tf to include Redshift secret:
-
-# UPDATE the Glue module call in main.tf:
-
-module "glue_etl" {
-  source = "./modules/glue"
-  
-  s3_bucket_name      = module.data_lake.bucket_name
-  s3_policy_arn       = module.iam_policies.s3_policy_arn
-  redshift_secret_arn = module.redshift_warehouse.secret_arn
-  redshift_endpoint   = module.redshift_warehouse.endpoint_address
-  
-  common_tags = var.common_tags
-}
-
-# ADD THIS TO main.tf (after the Glue module)
-
-# Call the Redshift module for data warehousing
+# Move this BEFORE the glue_etl module
 module "redshift_warehouse" {
   source = "./modules/redshift"
   
@@ -133,15 +112,14 @@ module "redshift_warehouse" {
   common_tags = var.common_tags
 }
 
-# ADD THIS TO main.tf (after the Redshift module)
-
-# Call the Step Functions module for ETL orchestration
-module "etl_orchestration" {
-  source = "./modules/stepfunctions"
+# Then the Glue module
+module "glue_etl" {
+  source = "./modules/glue"
   
-  redshift_workgroup_arn   = module.redshift_warehouse.workgroup_arn
-  redshift_workgroup_name  = "de-proj-redshift-workgroup"
-  secrets_policy_arn       = module.iam_policies.s3_policy_arn # or create dedicated secrets policy
+  s3_bucket_name      = module.data_lake.bucket_name
+  s3_policy_arn       = module.iam_policies.s3_policy_arn
+  redshift_secret_arn = module.redshift_warehouse.secret_arn
+  redshift_endpoint   = module.redshift_warehouse.endpoint_address
   
   common_tags = var.common_tags
 }

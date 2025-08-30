@@ -99,10 +99,9 @@ resource "aws_glue_crawler" "product_crawler" {
 resource "aws_s3_object" "glue_script" {
   bucket = var.s3_bucket_name
   key    = "glue-scripts/${var.etl_script_name}"
-  source = var.etl_script_path
-  etag   = filemd5(var.etl_script_path)
-
-  tags = var.common_tags
+  source = "${path.module}/raw_product_etl_job.py"  # Use path.module to reference the module directory
+  etag = filemd5("${path.module}/raw_product_etl_job.py")
+  tags   = var.common_tags
 }
 
 # Create Glue ETL job
@@ -194,8 +193,8 @@ resource "aws_glue_crawler" "orderdetails_crawler" {
 resource "aws_s3_object" "customer_glue_script" {
   bucket = var.s3_bucket_name
   key    = "glue-scripts/raw_customer_etl_job.py"
-  source = "raw_customer_etl_job.py"
-  etag   = filemd5("raw_customer_etl_job.py")
+  source = "${path.module}/raw_customer_etl_job.py"
+  etag   = filemd5("${path.module}/raw_customer_etl_job.py")
   tags = var.common_tags
 }
 
@@ -203,8 +202,8 @@ resource "aws_s3_object" "customer_glue_script" {
 resource "aws_s3_object" "orders_glue_script" {
   bucket = var.s3_bucket_name
   key    = "glue-scripts/raw_orders_etl_job.py"
-  source = "raw_orders_etl_job.py"
-  etag   = filemd5("raw_orders_etl_job.py")
+  source = "${path.module}/raw_orders_etl_job.py"
+  etag   = filemd5("${path.module}/raw_orders_etl_job.py")
   tags = var.common_tags
 }
 
@@ -212,8 +211,8 @@ resource "aws_s3_object" "orders_glue_script" {
 resource "aws_s3_object" "orderdetails_glue_script" {
   bucket = var.s3_bucket_name
   key    = "glue-scripts/raw_orderdetails_etl_job.py"
-  source = "raw_orderdetails_etl_job.py"
-  etag   = filemd5("raw_orderdetails_etl_job.py")
+  source = "${path.module}/raw_orderdetails_etl_job.py"
+  etag   = filemd5("${path.module}/raw_orderdetails_etl_job.py")
   tags = var.common_tags
 }
 
@@ -592,16 +591,16 @@ resource "aws_glue_connection" "redshift_connection" {
 resource "aws_s3_object" "load_product_script" {
   bucket = var.s3_bucket_name
   key    = "glue-scripts/de-proj-load-product-job.py"
-  source = "de-proj-load-product-job.py"
-  etag   = filemd5("de-proj-load-product-job.py")
+  source = "${path.module}/de-proj-load-product-job.py"
+  etag   = filemd5("${path.module}/de-proj-load-product-job.py")
   tags   = var.common_tags
 }
 
 resource "aws_s3_object" "load_customer_script" {
   bucket = var.s3_bucket_name
   key    = "glue-scripts/de-proj0load-customer-job.py"
-  source = "de-proj0load-customer-job.py"
-  etag   = filemd5("de-proj0load-customer-job.py")
+  source = "${path.module}/de-proj0load-customer-job.py"
+  etag   = filemd5("${path.module}/de-proj0load-customer-job.py")
   tags   = var.common_tags
 }
 
@@ -743,15 +742,15 @@ resource "aws_glue_job" "load_orderdetails" {
 resource "aws_s3_object" "load_orders_script" {
   bucket = var.s3_bucket_name
   key    = "glue-scripts/de-proj-load-order-job.py"
-  source = "de-proj-load-order-job.py"
-  etag   = filemd5("de-proj-load-order-job.py")
+  source = "${path.module}/de-proj-load-order-job.py"
+  etag   = filemd5("${path.module}/de-proj-load-order-job.py")
   tags   = var.common_tags
 }
 
 resource "aws_s3_object" "load_orderdetails_script" {
   bucket = var.s3_bucket_name
   key    = "glue-scripts/de-proj-load-ordersdetails-job.py"
-  source = "de-proj-load-ordersdetails-job.py"
-  etag   = filemd5("de-proj-load-ordersdetails-job.py")
+  source = "${path.module}/de-proj-load-ordersdetails-job.py"
+  etag   = filemd5("${path.module}/de-proj-load-ordersdetails-job.py")
   tags   = var.common_tags
 }

@@ -90,16 +90,13 @@ resource "aws_lambda_layer_version" "python_dependencies" {
 # Create deployment package for Lambda function
 data "archive_file" "lambda_zip" {
   type        = "zip"
-  source_file = var.lambda_source_file
-  output_path = "${path.module}/lambda_function.zip"
-  
-  # Force recreation when file content changes
-  depends_on = [local_file.lambda_code_trigger]
+  source_file = "${path.module}/lambda_function.py"
+  output_path = "${path.module}/lambda_deployment.zip"
 }
 
 # Detect changes in Lambda code
 resource "local_file" "lambda_code_trigger" {
-  content  = filemd5(var.lambda_source_file)
+content = filemd5("${path.module}/${var.lambda_source_file}")
   filename = "${path.module}/.lambda_hash"
 }
 

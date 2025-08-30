@@ -26,8 +26,8 @@ variable "timeout_seconds" {
 }
 
 variable "lambda_source_file" {
-  description = "Path to the Lambda function source code"
-  type        = string
+  description = "Path to Lambda source file"
+  type        = string  
   default     = "lambda_function.py"
 }
 

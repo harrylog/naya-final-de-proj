@@ -82,3 +82,8 @@ variable "common_tags" {
   type        = map(string)
   default     = {}
 }
+
+variable "redshift_secret_arn" {
+  description = "ARN of the Redshift connection secret"
+  type        = string
+}
