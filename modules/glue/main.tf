@@ -569,11 +569,11 @@ resource "aws_glue_connection" "redshift_connection" {
   
   connection_type = "JDBC"
   
-  connection_properties = {
-    JDBC_CONNECTION_URL = "jdbc:redshift://${var.redshift_endpoint}:5439/production"
-    USERNAME           = "admin"
-    PASSWORD           = var.redshift_secret_arn
-  }
+connection_properties = {
+  JDBC_CONNECTION_URL = "jdbc:redshift://${var.redshift_endpoint}:5439/production"
+  USERNAME           = "admin" 
+  PASSWORD           = "RedshiftAdmin123!"  # Use the actual password from your variables
+}
   
   physical_connection_requirements {
     # Get the AZ of the first subnet, not the subnet ID itself

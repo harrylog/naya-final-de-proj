@@ -105,7 +105,6 @@
               "Parameters": {
               "JobName": "${product_load_job}"              },
               "Next": "ExecuteProductSP",
-              "ResultPath": "$.load_result",
               "Retry": [
                 {
                   "ErrorEquals": ["States.TaskFailed"],
@@ -177,7 +176,6 @@
                 "JobName": "${customer_load_job}"
               },
               "Next": "ExecuteCustomerSP",
-              "ResultPath": "$.load_result",
               "Retry": [
                 {
                   "ErrorEquals": ["States.TaskFailed"],
