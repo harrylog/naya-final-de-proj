@@ -572,16 +572,22 @@ resource "aws_glue_connection" "redshift_connection" {
   connection_properties = {
     JDBC_CONNECTION_URL = "jdbc:redshift://${var.redshift_endpoint}:5439/production"
     USERNAME           = "admin"
-    PASSWORD           = var.redshift_secret_arn # Reference to secret
+    PASSWORD           = var.redshift_secret_arn
   }
   
   physical_connection_requirements {
-    availability_zone      = data.aws_subnets.default.ids[0]
+    # Get the AZ of the first subnet, not the subnet ID itself
+    availability_zone      = data.aws_subnet.first_subnet.availability_zone
     security_group_id_list = [aws_security_group.vpc_endpoint_sg_open.id]
     subnet_id             = data.aws_subnets.default.ids[0]
   }
 
   tags = var.common_tags
+}
+
+# Add this data source to get the AZ of the first subnet
+data "aws_subnet" "first_subnet" {
+  id = data.aws_subnets.default.ids[0]
 }
 
 

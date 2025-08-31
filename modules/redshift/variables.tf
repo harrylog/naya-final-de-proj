@@ -52,7 +52,7 @@ variable "publicly_accessible" {
 variable "redshift_secret_name" {
   description = "Name of the Redshift credentials secret"
   type        = string
-  default     = "de-proj-redshift-secret-v2"  # New name
+  default     = "de-proj-redshift-secret-v7"  # New name
 }
 
 variable "s3_policy_arn" {

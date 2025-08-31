@@ -189,3 +189,23 @@ terraform destroy -target=module.redshift_warehouse
 terraform apply -target=module.redshift_warehouse
 
 ### Tables and procedures created automatically via null_resource
+
+
+CREATE DATABASE production;
+CREATE SCHEMA sales;
+SET search_path TO sales;
+
+Table creation scripts (you have these files):
+
+
+customer_setup_sql.sql
+products_setup_sql.sql
+orders_setup_sql.sql
+order_details_setup_sql.sql
+
+
+Stored procedures (you have these files):
+
+
+customer_dim_sp.sql
+products_dim_sp.sql

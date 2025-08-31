@@ -30,7 +30,7 @@ resource "aws_db_instance" "mysql_db" {
   # Basic instance configuration
   identifier     = var.db_identifier
   engine         = "mysql"
-  engine_version = "8.0.37"
+  engine_version = "8.0.40"
   instance_class = "db.t3.micro"  # Free tier eligible
   db_subnet_group_name   = aws_db_subnet_group.mysql_subnet_group.name
   vpc_security_group_ids = [aws_security_group.rds_sg.id]
