@@ -213,3 +213,62 @@ products_dim_sp.sql
 
 
 Bronze S3 (raw data) → Glue ETL jobs (transform) → Silver S3 (cleaned) → Glue load jobs → Redshift tables (final)
+
+
+Project Summary: End-to-End Data Engineering Pipeline
+This is a comprehensive modern data lake and warehouse architecture built on AWS using Infrastructure as Code (Terraform). Here's the complete flow:
+Architecture Overview
+MySQL (Source) → DMS → S3 Data Lake → Glue ETL → Redshift → Step Functions Orchestration
+Components Built
+
+MySQL RDS - Source transactional database with sample retail data
+DMS (Database Migration Service) - Captures changes from MySQL to S3
+S3 Data Lake - Bronze (raw) and Silver (processed) data layers
+AWS Glue - ETL jobs for data transformation and loading
+Redshift Serverless - Data warehouse with dimensional modeling
+Step Functions - Orchestrates the entire ETL pipeline
+Supporting Services - IAM, Secrets Manager, VPC endpoints, Lambda
+
+Data Processing Flow
+
+Ingestion: DMS streams MySQL data to S3 bronze layer
+Transformation: Glue jobs clean and transform bronze → silver data
+Loading: Glue jobs load transformed data into Redshift dimension/fact tables
+Orchestration: Step Functions coordinates parallel execution with error handling
+
+Key Technical Challenges Solved
+
+Networking: VPC endpoints for private service communication
+Security: Secrets management, IAM policies, role-based access
+Scalability: Parallel processing, serverless compute
+Error Handling: Retry logic, monitoring, failure recovery
+Cost Management: Daily destroy/recreate patterns for development
+
+Required Data Knowledge
+Essential Skills
+
+SQL - Database querying, joins, dimensional modeling concepts
+Data Modeling - Understanding fact tables, dimension tables, star schema
+ETL Concepts - Extract, Transform, Load patterns and best practices
+Cloud Architecture - AWS services interaction and data flow patterns
+
+Terraform/Infrastructure
+
+Infrastructure as Code principles
+Module-based architecture
+Variable management and dependencies
+
+AWS Services Understanding
+
+S3: Data lake storage patterns (bronze/silver/gold)
+Glue: Spark-based ETL jobs and Data Catalog
+Redshift: Columnar data warehouse, query optimization
+Step Functions: State machines, parallel execution, error handling
+DMS: Change data capture, replication concepts
+
+Data Engineering Patterns
+
+Lambda Architecture: Batch and real-time processing
+Medallion Architecture: Bronze → Silver → Gold data progression
+Idempotency: Ensuring pipeline can be safely re-run
+Data Quality: Validation, monitoring, alerting
