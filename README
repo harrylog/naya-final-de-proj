@@ -209,3 +209,7 @@ Stored procedures (you have these files):
 
 customer_dim_sp.sql
 products_dim_sp.sql
+
+
+
+Bronze S3 (raw data) → Glue ETL jobs (transform) → Silver S3 (cleaned) → Glue load jobs → Redshift tables (final)
