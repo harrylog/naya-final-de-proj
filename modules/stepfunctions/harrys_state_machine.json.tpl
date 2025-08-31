@@ -1,5 +1,5 @@
 {
-  "Comment": "ETL Pipeline Orchestration with Status Monitoring",
+  "Comment": "Simplified ETL Pipeline Orchestration",
   "StartAt": "TransformationJobsParallel",
   "States": {
     "TransformationJobsParallel": {
@@ -103,8 +103,9 @@
               "Type": "Task",
               "Resource": "arn:aws:states:::glue:startJobRun.sync",
               "Parameters": {
-              "JobName": "${product_load_job}"              },
-              "Next": "ExecuteProductSP",
+                "JobName": "${product_load_job}"
+              },
+              "End": true,
               "Retry": [
                 {
                   "ErrorEquals": ["States.TaskFailed"],
@@ -113,56 +114,6 @@
                   "MaxAttempts": 3
                 }
               ]
-            },
-            "ExecuteProductSP": {
-              "Type": "Task",
-              "Resource": "arn:aws:states:::aws-sdk:redshiftdata:executeStatement",
-              "Parameters": {
-                "Database": "production",
-                "Sql": "CALL sales.sp_merge_dim_product();",
-                "WorkgroupName": "${redshift_workgroup_name}",
-                "SecretArn": "${redshift_secret_arn}"              },
-              "ResultPath": "$.sp_result",
-              "Next": "WaitProductSP"
-            },
-            "WaitProductSP": {
-              "Type": "Wait",
-              "Seconds": 5,
-              "Next": "CheckProductSPStatus"
-            },
-            "CheckProductSPStatus": {
-              "Type": "Task",
-              "Resource": "arn:aws:states:::aws-sdk:redshiftdata:describeStatement",
-              "Parameters": {
-                "Id.$": "$.sp_result.Id"
-              },
-              "ResultPath": "$.status_result",
-              "Next": "IsProductSPComplete"
-            },
-            "IsProductSPComplete": {
-              "Type": "Choice",
-              "Choices": [
-                {
-                  "Variable": "$.status_result.Status",
-                  "StringEquals": "FAILED",
-                  "Next": "ProductSPFailure"
-                },
-                {
-                  "Variable": "$.status_result.Status",
-                  "StringEquals": "FINISHED",
-                  "Next": "ProductSPSuccess"
-                }
-              ],
-              "Default": "WaitProductSP"
-            },
-            "ProductSPSuccess": {
-              "Type": "Pass",
-              "End": true
-            },
-            "ProductSPFailure": {
-              "Type": "Fail",
-              "Cause": "Product stored procedure failed",
-              "Error": "StoredProcedureError"
             }
           }
         },
@@ -175,7 +126,7 @@
               "Parameters": {
                 "JobName": "${customer_load_job}"
               },
-              "Next": "ExecuteCustomerSP",
+              "End": true,
               "Retry": [
                 {
                   "ErrorEquals": ["States.TaskFailed"],
@@ -184,56 +135,6 @@
                   "MaxAttempts": 3
                 }
               ]
-            },
-            "ExecuteCustomerSP": {
-              "Type": "Task",
-              "Resource": "arn:aws:states:::aws-sdk:redshiftdata:executeStatement",
-              "Parameters": {
-                "Database": "production",
-                "Sql": "CALL sales.sp_merge_dim_customer();",
-                "WorkgroupName": "${redshift_workgroup_name}",
-                "SecretArn": "${redshift_secret_arn}"              },
-              "ResultPath": "$.sp_result",
-              "Next": "WaitCustomerSP"
-            },
-            "WaitCustomerSP": {
-              "Type": "Wait",
-              "Seconds": 5,
-              "Next": "CheckCustomerSPStatus"
-            },
-            "CheckCustomerSPStatus": {
-              "Type": "Task",
-              "Resource": "arn:aws:states:::aws-sdk:redshiftdata:describeStatement",
-              "Parameters": {
-                "Id.$": "$.sp_result.Id"
-              },
-              "ResultPath": "$.status_result",
-              "Next": "IsCustomerSPComplete"
-            },
-            "IsCustomerSPComplete": {
-              "Type": "Choice",
-              "Choices": [
-                {
-                  "Variable": "$.status_result.Status",
-                  "StringEquals": "FAILED",
-                  "Next": "CustomerSPFailure"
-                },
-                {
-                  "Variable": "$.status_result.Status",
-                  "StringEquals": "FINISHED",
-                  "Next": "CustomerSPSuccess"
-                }
-              ],
-              "Default": "WaitCustomerSP"
-            },
-            "CustomerSPSuccess": {
-              "Type": "Pass",
-              "End": true
-            },
-            "CustomerSPFailure": {
-              "Type": "Fail",
-              "Cause": "Customer stored procedure failed",
-              "Error": "StoredProcedureError"
             }
           }
         }
